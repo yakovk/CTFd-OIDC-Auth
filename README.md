@@ -5,42 +5,28 @@ Add OpenID Connect (OIDC) authentication to CTFd 2.x using compatible providers.
 
 **This plugin is still in development and may not work properly in your configuration.**
 
-✅ `Flask-Dance` is required.
+✅ `Authlib` is required.
+✅ `Loginpass` is required.
 
 ## Supported Providers:
 * `azure` (Azure Active Directory)
-* `github` (GitHub)
-* ... and any other Flask-Dance provider, with a little work!
+* Other OIDC providers supported by Authlib
+
 
 ## Configuration
-The following configuration options must be provided via Flask config or environment:
+
+The following configuration options must be provided via environment:
+
+### Common
 ```
-OAUTHLOGIN_CLIENT_ID - OAuth2 Provider Client ID
-OAUTHLOGIN_CLIENT_SECRET - OAuth2 Provider Client Secret
-OAUTHLOGIN_PROVIDER - OAuth2 Provider name (see 'Supported Providers' above)
-OAUTHLOGIN_CREATE_MISSING_USER - If the plugin should create a CTFd user to link to the OAuth2 user
+OIDC_LOGIN_BACKEND - What OIDC backend to use. Defaults to "None" and will not load the plugin.
+OIDC_CREATE_MISSING_USER - Whether to create missing users in CTFd database. Defaults to "False".
 ```
+### Provider-specific
 
-## Extensibility:
-Adding a new provider is as simple as adding entries to the two lambda dictionaries, `provider_blueprints` and `provider_users`.
-
-```python
-# Key is the OAuth provider name
-# Value is a lambda that returns a Blueprint for the authentication controller
-provider_blueprints = {
-    'azure': lambda: flask_dance.contrib.azure.make_azure_blueprint(
-        login_url='/azure',
-        client_id=oauth_client_id,
-        client_secret=oauth_client_secret,
-        redirect_url=authentication_url_prefix + "/azure/confirm")
-}
-
-# Key is the OAuth provider name
-# Value is a lambda that returns a User object mapped from the OAuth user, or None if the user doesn't exist and creation is disabled.
-provider_users = {
-    'azure': lambda: 
-        get_bridge_user(
-            displayName=flask_dance.contrib.azure.azure.get("/v1.0/me").json()["displayName"],
-            email=flask_dance.contrib.azure.azure.get("/v1.0/me").json()["userPrincipalName"])
-}
+Azure Active Directory:
+```
+AZURE_CLIENT_ID - Azure Active Directory Client ID
+AZURE_CLIENT_SECRET - Azure Active Directory Client Secret
+AZURE_TENANT_ID - Azure Active Directory Tenant
 ```
